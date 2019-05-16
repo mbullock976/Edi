@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
+     xmlns:netfx='http://schemas.microsoft.com/wix/NetFxExtension'>
+
+  <!-- Give product a unique ID per platform 1.0.0-->
+  <?if $(var.Platform)=x64 ?>
+    <?define ProductCode = "{F10ACB0B-1319-43EA-A0E4-4C321A8633F9}" ?>
+  <?else?>
+    <?define ProductCode = "{2C6F9B98-1EA0-47A7-9FBF-CD09BBE3CE18}" ?>
+  <?endif?>
+
+  <!-- Fixed upgrade Id - CHANGING THIS WILL IGNORE PREVIOUS INSTALL VERSIONS - WE SHOULD NOT CHANGE THIS -->
+  <?define UpgradeCode = "{679550FE-EED7-4D6B-9A3E-1DAC418072CC}" ?>
+
+  <!-- Define main product -->
+  <Product Id="$(var.ProductCode)"
+           Name="Edi"
+           Language="!(loc.Language)"
+           Version="$(var.BuildVersion)"
+           Manufacturer="!(loc.Company)"
+           UpgradeCode="$(var.UpgradeCode)">
+
+    <!-- Provide package details -->
+    <Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Platform="$(var.Platform)"
+             Manufacturer="!(loc.Company)"
+             Description="!(loc.Description)"
+             Keywords="!(loc.Keywords)"
+             Comments="!(loc.Comments)"
+             Languages="!(loc.Language)"
+            />
+
+    <!-- Downgrade error message -->
+    <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeErrorMessage)" />
+
+    <!-- Include .cab file into .msi file -->
+    <MediaTemplate EmbedCab="yes"/>
+
+    <!-- Prevent installation if .NET 4.7.1 framework is not installed - raise error message -->
+    <PropertyRef Id="NETFRAMEWORK45" />
+    <Condition Message="Requires .NET Framework 4.5.2 or later to be installed">
+      <![CDATA[Installed OR (NETFRAMEWORK45 AND NETFRAMEWORK45 >= "#461310")]]>
+    </Condition>
+
+    <!-- Define main app icon -->
+    <Icon Id="icon.ico" SourceFile="app.ico" />
+
+    <!-- Use the icon.ico icon for this installer (shows up in Add/Remove programs) -->
+    <Property Id="ARPPRODUCTICON">icon.ico</Property>
+
+    <!-- Help/Support website (shows in the Add/Remove programs) -->
+    <Property Id="ARPURLINFOABOUT">https://www.dirkster99.com/</Property>
+
+    <!-- Required for using any form of InstallDir UI Dialog -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <!-- Create a No License UI for the installer -->
+    <UIRef Id="NoLicenseDialogWorkflow" />
+
+    <!-- Change the installer UI background images -->
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\Assets\Background.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\Assets\Banner.bmp" />
+
+    <!-- Define components, shortcuts, files etc... for installer -->
+    <Feature Id="ProductFeature" Title="Edi" Level="1">
+
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="PublishedComponents" />
+      <ComponentGroupRef Id="ComponentGroupDesktopShortcut" />
+
+    </Feature>
+
+  </Product>
+  
+
+</Wix>
